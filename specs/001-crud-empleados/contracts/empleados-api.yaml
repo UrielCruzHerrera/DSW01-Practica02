@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: Empleados CRUD API
+  version: 1.0.0
+  description: API para gestión de empleados con autenticación HTTP Basic.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+paths:
+  /api/empleados:
+    get:
+      summary: Listar empleados
+      description: Retorna listado completo si no se envían parámetros; con paginación retorna resultados en páginas de 5 registros.
+      operationId: listarEmpleados
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+          description: Número de página (base 0).
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 5
+            enum: [5]
+          description: Tamaño de página. Para esta feature se fija en 5.
+      responses:
+        '200':
+          description: Lista de empleados (arreglo si no hay paginación; objeto paginado con metadatos si hay paginación)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Empleado'
+                  - $ref: '#/components/schemas/EmpleadoPageResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      summary: Crear empleado
+      operationId: crearEmpleado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpleadoCreateRequest'
+      responses:
+        '201':
+          description: Empleado creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empleado'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Clave duplicada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/empleados/{clave}:
+    parameters:
+      - name: clave
+        in: path
+        required: true
+        schema:
+          type: string
+          maxLength: 50
+          pattern: '^E-[0-9]+$'
+    get:
+      summary: Consultar empleado por clave
+      operationId: obtenerEmpleadoPorClave
+      responses:
+        '200':
+          description: Empleado encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empleado'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      summary: Actualizar empleado
+      operationId: actualizarEmpleado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmpleadoUpdateRequest'
+      responses:
+        '200':
+          description: Empleado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Empleado'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      summary: Eliminar empleado
+      operationId: eliminarEmpleado
+      responses:
+        '204':
+          description: Empleado eliminado
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    Empleado:
+      type: object
+      required:
+        - clave
+        - nombre
+        - direccion
+        - telefono
+      properties:
+        clave:
+          type: string
+          maxLength: 50
+          pattern: '^E-[0-9]+$'
+          example: E-1
+        nombre:
+          type: string
+          maxLength: 100
+          example: Juan Pérez
+        direccion:
+          type: string
+          maxLength: 100
+          example: Calle Principal 123
+        telefono:
+          type: string
+          maxLength: 100
+          example: 555-1234
+    EmpleadoCreateRequest:
+      type: object
+      required:
+        - nombre
+        - direccion
+        - telefono
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+        direccion:
+          type: string
+          maxLength: 100
+        telefono:
+          type: string
+          maxLength: 100
+    EmpleadoUpdateRequest:
+      type: object
+      required:
+        - nombre
+        - direccion
+        - telefono
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+        direccion:
+          type: string
+          maxLength: 100
+        telefono:
+          type: string
+          maxLength: 100
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: EMPLEADO_NOT_FOUND
+        message:
+          type: string
+          example: No existe empleado con clave E-999.
+    EmpleadoPageResponse:
+      type: object
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Empleado'
+        page:
+          type: integer
+          minimum: 0
+          example: 0
+        size:
+          type: integer
+          example: 5
+        totalElements:
+          type: integer
+          minimum: 0
+          example: 42
+        totalPages:
+          type: integer
+          minimum: 0
+          example: 9
+  responses:
+    Unauthorized:
+      description: Credenciales inválidas o ausentes
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Error de validación de entrada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -31,7 +31,12 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Stack gate: solución en Java 17 + Spring Boot 3.x
+- [ ] Security gate: HTTP Basic definido (credenciales locales `admin`/`admin123`)
+- [ ] Data gate: PostgreSQL definido con configuración externalizada
+- [ ] Container gate: estrategia Docker para app + PostgreSQL documentada
+- [ ] API contract gate: OpenAPI/Swagger actualizado para endpoints afectados
+- [ ] Observability gate: health checks y logging considerados en el diseño
 
 ## Project Structure
 

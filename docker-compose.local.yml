@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: empleados-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dsw01_practica02}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-dsw01_practica02}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: eclipse-temurin:17-jre
+    container_name: empleados-app
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    command: ["java", "-jar", "target/empleados-0.0.1-SNAPSHOT.jar"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-dsw01_practica02}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SPRING_SECURITY_USER_NAME: ${SPRING_SECURITY_USER_NAME:-admin}
+      SPRING_SECURITY_USER_PASSWORD: ${SPRING_SECURITY_USER_PASSWORD:-admin123}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

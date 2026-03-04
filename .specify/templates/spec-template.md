@@ -90,6 +90,19 @@
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
+### Constitution Alignment *(mandatory)*
+
+- **CA-001**: The feature MUST run on Java 17 + Spring Boot 3.x.
+- **CA-002**: The feature MUST define HTTP Basic authentication behavior,
+  including local credentials (`admin`/`admin123`) and environment override for
+  non-local environments.
+- **CA-003**: The feature MUST describe PostgreSQL persistence impact, including
+  schema/migration changes when applicable.
+- **CA-004**: The feature MUST document Docker execution impact (application and
+  PostgreSQL runtime dependencies).
+- **CA-005**: The feature MUST define OpenAPI/Swagger documentation impact for
+  created or modified endpoints.
+
 *Example of marking unclear requirements:*
 
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
